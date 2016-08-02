@@ -1,12 +1,16 @@
 component extends="mxunit.framework.TestCase" {
 
     public void function setUp() {
-        variables.fw = new org.corfield.framework();
+        structDelete(request,"_fw1"); // force a reset of tracing vars
+        variables.fw = new framework.one();
         variables.fw.enableTracing = _enableTracing;
         variables.fw.enableTracing();
-        request.fw = new org.corfield.framework();
+        request.fw = new framework.one();
         request.fw.enableTracing = _enableTracing;
         request.fw.enableTracing();
+        variables.fwExtended = new traceRender.one();
+        variables.fwExtended.enableTracing = _enableTracing;
+        variables.fwExtended.enableTracing();
     }
 
     private void function _enableTracing() {
@@ -53,12 +57,46 @@ component extends="mxunit.framework.TestCase" {
 
     public void function testTraceOutputReq() {
         request.fw.onApplicationStart();
-        variables.fw.renderData( "text", "test" );
+        variables.fw.renderData( "text", "myteststring" );
         var output = "";
         savecontent variable="output" {
+            request.fw.onRequest("/index.cfm");
             request.fw.onRequestEnd();
         }
+        assertTrue( output contains "myteststring" );
         assertFalse( output contains "framework lifecycle trace" );
     }
+
+    public void function testTraceOutputHTMLReq() {
+        request.fw.onApplicationStart();
+        variables.fw.renderData( "html", "<p>myteststring</p>" );
+        var output = "";
+        savecontent variable="output" {
+            request.fw.onRequest("/index.cfm");
+            request.fw.onRequestEnd();
+        }
+        assertTrue( output contains "myteststring" );
+        assertTrue( output contains "framework lifecycle trace" );
+    }
+
+    public void function testSetupTraceRenderHtml() {
+        variables.fwExtended.onApplicationStart();
+        var output = "";
+        savecontent variable="output" {
+            variables.fwExtended.onRequestEnd();
+        }
+        assertTrue( output contains "framework lifecycle trace" );
+    }
+
+    public void function testSetupTraceRenderData() {
+        variables.fwExtended.onApplicationStart();
+        variables.fwExtended.renderData( "text", "test" );
+        var output = "";
+        savecontent variable="output" {
+            variables.fwExtended.onRequestEnd();
+        }
+        assertEquals( output, "custom trace render" );
+    }
+
 
 }
