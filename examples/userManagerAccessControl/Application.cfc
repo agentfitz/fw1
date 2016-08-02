@@ -1,4 +1,4 @@
-component extends="org.corfield.framework" {
+component extends="framework.one" {
 
 	this.mappings["/userManager"] = getDirectoryFromPath(getCurrentTemplatePath());
 	this.name = 'fw1-userManager-accessControl';
@@ -7,16 +7,11 @@ component extends="org.corfield.framework" {
 	
 	// FW/1 - configuration:
 	variables.framework = {
-		suppressImplicitService = false,
-        // this example uses the deprecated service() call
-        // this example uses the deprecated start/end actions
-        suppressServiceQueue = false
+        trace = true
 	};
 
-	function setupApplication()
-	{
+	function setupApplication() {
 		application.adminEmail = 'admin@mysite.com';
-		setBeanFactory(createObject("component", "model.ObjectFactory").init(expandPath("./assets/config/beans.xml.cfm")));
 	}
 
 	function setupSession() {
